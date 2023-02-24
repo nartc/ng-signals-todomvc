@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { map } from 'rxjs';
 import { fromObservable } from '../rxjs-interop/from-observable';
 
-export type TodoFilter = 'SHOW_ALL' | 'SHOW_ACTIVE' | 'SHOW_COMPLETED';
+export type TodoFilter = 'all' | 'active' | 'completed';
 
 export interface Todo {
     id: number;
@@ -17,31 +17,17 @@ export class TodosSignal {
     private readonly route = inject(ActivatedRoute);
     private readonly cdr = inject(ChangeDetectorRef);
 
-    private readonly filterParam = fromObservable(this.route.params.pipe(map((params) => params['filter'])), 'all');
     private readonly todos = signal<Todo[]>([]);
 
-    readonly filter = computed<TodoFilter>(() => {
-        switch (this.filterParam()) {
-            case 'active': {
-                return 'SHOW_ACTIVE';
-            }
-            case 'completed': {
-                return 'SHOW_COMPLETED';
-            }
-            default: {
-                return 'SHOW_ALL';
-            }
-        }
-    });
-
+    readonly filterParam = fromObservable(this.route.params.pipe(map((params) => params['filter'])), 'all');
     readonly filteredTodos = computed(() => {
-        switch (this.filter()) {
+        switch (this.filterParam()) {
             default:
-            case 'SHOW_ALL':
+            case 'all':
                 return this.todos();
-            case 'SHOW_ACTIVE':
+            case 'active':
                 return this.todos().filter((todo) => !todo.completed);
-            case 'SHOW_COMPLETED':
+            case 'completed':
                 return this.todos().filter((todo) => todo.completed);
         }
     });

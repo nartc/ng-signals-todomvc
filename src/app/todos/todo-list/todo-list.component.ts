@@ -1,5 +1,5 @@
 import { NgFor, NgIf } from '@angular/common';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { TodoItem } from '../todo-item/todo-item.component';
 import { Todo } from '../todos.signal';
 
@@ -20,7 +20,6 @@ import { Todo } from '../todos.signal';
             </ul>
         </section>
     `,
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [NgIf, NgFor, TodoItem],
 })
 export class TodoList {

@@ -11,13 +11,13 @@ import { TodoFilter } from '../todos.signal';
             <span id="todo-count" class="todo-count">{{ incompleteTodosCount }} items left</span>
             <ul id="filters" class="filters">
                 <li>
-                    <a routerLink="/all" [class.selected]="currentFilter === 'SHOW_ALL'">All</a>
+                    <a routerLink="/all" [class.selected]="currentFilter === 'all'">All</a>
                 </li>
                 <li>
-                    <a routerLink="/active" [class.selected]="currentFilter === 'SHOW_ACTIVE'">Active</a>
+                    <a routerLink="/active" [class.selected]="currentFilter === 'active'">Active</a>
                 </li>
                 <li>
-                    <a routerLink="/completed" [class.selected]="currentFilter === 'SHOW_COMPLETED'">Completed</a>
+                    <a routerLink="/completed" [class.selected]="currentFilter === 'completed'">Completed</a>
                 </li>
             </ul>
             <button
@@ -35,6 +35,6 @@ import { TodoFilter } from '../todos.signal';
 export class TodoFooter {
     @Input() hasCompletedTodos = false;
     @Input() incompleteTodosCount = 0;
-    @Input() currentFilter: TodoFilter = 'SHOW_ALL';
+    @Input() currentFilter: TodoFilter = 'all';
     @Output() clearCompleted = new EventEmitter();
 }

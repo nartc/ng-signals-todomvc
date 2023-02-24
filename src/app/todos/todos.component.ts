@@ -23,7 +23,7 @@ import { TodosSignal } from './todos.signal';
             *ngIf="todosSignal.hasTodos()"
             [hasCompletedTodos]="todosSignal.hasCompletedTodos()"
             [incompleteTodosCount]="todosSignal.incompleteTodosCount()"
-            [currentFilter]="todosSignal.filter()"
+            [currentFilter]="todosSignal.filterParam()"
             (clearCompleted)="todosSignal.clearComplete()"
         />
     `,
