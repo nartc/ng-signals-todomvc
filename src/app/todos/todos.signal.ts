@@ -36,25 +36,23 @@ export class TodosSignal {
     readonly hasCompletedTodos = computed(() => this.todos().some((todo) => todo.completed));
     readonly incompleteTodosCount = computed(() => this.todos().filter((todo) => !todo.completed).length);
 
-    load() {
-        fetch('assets/todos.json')
-            .then((res) => res.json())
-            .then((data) => {
-                this.todos.set(data);
-                this.cdr.detectChanges();
-            });
+    async load() {
+        const todos = await fetch('assets/todos.json').then((res) => res.json());
+        this.todos.set(todos);
+        this.cdr.markForCheck();
     }
 
     add(text: string) {
-        this.todos.update((todos) => {
-            return [...todos, { id: Math.random(), text, creationDate: new Date(), completed: false }];
-        });
+        this.todos.update((todos) => [
+            ...todos,
+            { id: Math.random(), text, creationDate: new Date(), completed: false },
+        ]);
     }
 
     toggle(id: number) {
         this.todos.update((todos) =>
             todos.map((todo) => {
-                todo.completed = todo.id === id ? !todo.completed : todo.completed;
+                if (todo.id === id) return { ...todo, completed: !todo.completed };
                 return todo;
             })
         );
@@ -67,7 +65,7 @@ export class TodosSignal {
     update(id: number, text: string) {
         this.todos.update((todos) =>
             todos.map((todo) => {
-                todo.text = todo.id === id ? text : todo.text;
+                if (todo.id === id) return { ...todo, text };
                 return todo;
             })
         );
