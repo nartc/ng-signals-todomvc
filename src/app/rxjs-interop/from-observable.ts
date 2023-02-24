@@ -53,8 +53,9 @@ export function fromObservable<T, U = never>(source: Observable<T>, initialValue
         error: (error) => state.set({ kind: StateKind.Error, error }),
     });
 
+    const viewRef = inject(ChangeDetectorRef) as ViewRef;
     queueMicrotask(() => {
-        (inject(ChangeDetectorRef) as ViewRef).onDestroy(() => {
+        viewRef.onDestroy(() => {
             subscription.unsubscribe();
         });
     });
