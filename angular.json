@@ -67,6 +67,7 @@
                                     "maximumError": "4kb"
                                 }
                             ],
+                            "baseHref": "/ng-signals-todomvc/",
                             "outputHashing": "all"
                         },
                         "development": {
