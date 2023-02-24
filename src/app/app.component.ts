@@ -11,6 +11,10 @@ import { RouterOutlet } from '@angular/router';
         <footer class="info">
             <p>Double-click to edit a todo</p>
             <p>
+                Github Repo
+                <a href="https://github.com/nartc/ng-signals-todomvc">nartc/ng-signals-todomvc</a>
+            </p>
+            <p>
                 Part of
                 <a href="http://todomvc.com">TodoMVC</a>
             </p>

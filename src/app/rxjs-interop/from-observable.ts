@@ -53,12 +53,14 @@ export function fromObservable<T, U = never>(source: Observable<T>, initialValue
         error: (error) => state.set({ kind: StateKind.Error, error }),
     });
 
+    // HACK  PLEASE DO NOT COPY THIS TO USE IN YOUR CODE
     const viewRef = inject(ChangeDetectorRef) as ViewRef;
     queueMicrotask(() => {
         viewRef.onDestroy(() => {
             subscription.unsubscribe();
         });
     });
+    // HACK  END
 
     return computed(() => {
         const current = state();
