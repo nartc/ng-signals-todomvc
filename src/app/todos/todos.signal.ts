@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, computed, inject, Injectable, signal } from '@angular/core';
+import { ChangeDetectorRef, computed, inject, InjectionToken, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { map } from 'rxjs';
 import { fromObservable } from '../rxjs-interop/from-observable';
@@ -12,66 +12,64 @@ export interface Todo {
     completed: boolean;
 }
 
-@Injectable()
-export class TodosSignal {
-    private readonly route = inject(ActivatedRoute);
-    private readonly cdr = inject(ChangeDetectorRef);
+function todosSignalFactory(cdr = inject(ChangeDetectorRef), route = inject(ActivatedRoute)) {
+    const todos = signal<Todo[]>([]);
 
-    private readonly todos = signal<Todo[]>([]);
-
-    readonly filterParam = fromObservable(this.route.params.pipe(map((params) => params['filter'])), 'all');
-    readonly filteredTodos = computed(() => {
-        switch (this.filterParam()) {
+    const filterParam = fromObservable(route.params.pipe(map((params) => params['filter'])), 'all');
+    const filteredTodos = computed(() => {
+        switch (filterParam()) {
             default:
             case 'all':
-                return this.todos();
+                return todos();
             case 'active':
-                return this.todos().filter((todo) => !todo.completed);
+                return todos().filter((todo) => !todo.completed);
             case 'completed':
-                return this.todos().filter((todo) => todo.completed);
+                return todos().filter((todo) => todo.completed);
         }
     });
 
-    readonly hasTodos = computed(() => this.todos().length > 0);
-    readonly hasCompletedTodos = computed(() => this.todos().some((todo) => todo.completed));
-    readonly incompleteTodosCount = computed(() => this.todos().filter((todo) => !todo.completed).length);
+    const hasTodos = computed(() => todos().length > 0);
+    const hasCompletedTodos = computed(() => todos().some((todo) => todo.completed));
+    const incompleteTodosCount = computed(() => todos().filter((todo) => !todo.completed).length);
 
-    async load() {
-        const todos = await fetch('assets/todos.json').then((res) => res.json());
-        this.todos.set(todos);
-        this.cdr.markForCheck();
-    }
+    return {
+        filterParam,
+        filteredTodos,
+        hasTodos,
+        hasCompletedTodos,
+        incompleteTodosCount,
+        load: async () => {
+            todos.set(await fetch('assets/todos.json').then((res) => res.json()));
+            cdr.markForCheck();
+        },
+        add: (text: string) => {
+            todos.mutate((v) => {
+                v.push({ id: Math.random(), text, creationDate: new Date(), completed: false });
+            });
+        },
+        toggle: (id: number) => {
+            todos.mutate((v) => {
+                const todo = v.find((todo) => todo.id === id);
+                if (todo) todo.completed = !todo.completed;
+            });
+        },
+        delete: (id: number) => {
+            todos.update((v) => v.filter((todo) => todo.id !== id));
+        },
+        update: (id: number, text: string) => {
+            todos.mutate((v) => {
+                const todo = v.find((todo) => todo.id === id);
+                if (todo) todo.text = text;
+            });
+        },
+        clearComplete: () => {
+            todos.update((v) => v.filter((todo) => !todo.completed));
+        },
+    };
+}
 
-    add(text: string) {
-        this.todos.update((todos) => [
-            ...todos,
-            { id: Math.random(), text, creationDate: new Date(), completed: false },
-        ]);
-    }
+export const TODOS_STORE = new InjectionToken<ReturnType<typeof todosSignalFactory>>('TodosStore with Signals');
 
-    toggle(id: number) {
-        this.todos.update((todos) =>
-            todos.map((todo) => {
-                if (todo.id === id) return { ...todo, completed: !todo.completed };
-                return todo;
-            })
-        );
-    }
-
-    delete(id: number) {
-        this.todos.update((todos) => todos.filter((todo) => todo.id !== id));
-    }
-
-    update(id: number, text: string) {
-        this.todos.update((todos) =>
-            todos.map((todo) => {
-                if (todo.id === id) return { ...todo, text };
-                return todo;
-            })
-        );
-    }
-
-    clearComplete() {
-        this.todos.update((todos) => todos.filter((todo) => !todo.completed));
-    }
+export function provideTodosStore() {
+    return { provide: TODOS_STORE, useFactory: todosSignalFactory };
 }
